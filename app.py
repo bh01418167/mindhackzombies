@@ -8,8 +8,8 @@ import openai
 import streamlit as st
 import os
 from streamlit_option_menu import option_menu
-from aggregator import Aggregator
-from trade_tracer import TradeTracer
+from src.aggregator import Aggregator
+from src.trade_tracer import TradeTracer
 import re
 
 
@@ -66,7 +66,7 @@ if page == "📊 Trace":
     uploaded_files = st.file_uploader("Upload Files", type="csv", accept_multiple_files=True)
 
     if uploaded_files:
-        input_dir = "./generated_trade_files"
+        input_dir = "src/generated_trade_files"
         os.makedirs(input_dir, exist_ok=True)
         for f in os.listdir(input_dir):
             os.remove(os.path.join(input_dir, f))
@@ -81,8 +81,8 @@ if page == "📊 Trace":
             try:
                 aggregator = Aggregator()
                 aggregator.produce_aggregation_file()
-                agg_df = pd.read_csv("./6g_liquidity_aggregation.csv")
-                complete_df = pd.read_csv("./full_trades_with_impact.csv")
+                agg_df = pd.read_csv("src/6g_liquidity_aggregation.csv")
+                complete_df = pd.read_csv("src/full_trades_with_impact.csv")
                 anomaly_rows = agg_df.sample(n=3, random_state=42)
                 anomaly_rows["is_anomaly"] = True
                 agg_df["is_anomaly"] = False
