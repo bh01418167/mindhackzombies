@@ -2,7 +2,7 @@ import warnings
 
 import pandas as pd
 
-from trade_tracer import TradeTracer
+from src.trade_tracer import TradeTracer
 
 
 class Prompter:

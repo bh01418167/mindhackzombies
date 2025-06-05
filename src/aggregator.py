@@ -1,7 +1,7 @@
 import warnings
 
 from src.aggregation_model import AggregationModel
-from preprocessor import PreProcessor
+from src.preprocessor import PreProcessor
 import pandas as pd
 import glob
 import os
