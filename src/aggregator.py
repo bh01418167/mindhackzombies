@@ -9,9 +9,10 @@ import os
 
 
 class Aggregator:
-    input_dir = os.path.join(os.getenv("HOME", "."), "generated_trade_files")
-    output_agg_file_location = os.path.join(os.getenv("HOME", "."), "./6g_liquidity_aggregation.csv")
-    complete_file_location = os.path.join(os.getenv("HOME", "."), "./full_trades_with_impact.csv")
+    storage_folder = '/home/storage'
+    input_dir = os.path.join(storage_folder, "generated_trade_files")
+    output_agg_file_location = os.path.join(storage_folder, "6g_liquidity_aggregation.csv")
+    complete_file_location = os.path.join(storage_folder, "full_trades_with_impact.csv")
 
     def __init__(self):
         logging.info("input dir:::", self.input_dir)

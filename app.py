@@ -23,10 +23,11 @@ openai.api_type = "azure"
 openai.api_base = AZURE_OPENAI_ENDPOINT
 openai.api_key = AZURE_OPENAI_API_KEY
 openai.api_version = "2023-07-01-preview"  # Use the version that supports GPT-4o
+storage_folder = "/home/storage"
 
-input_dir = os.path.join(os.getenv("HOME", "."), "src/generated_trade_files")
-output_agg_file_location = os.path.join(os.getenv("HOME", "."), "/src/6g_liquidity_aggregation.csv")
-complete_file_location = os.path.join(os.getenv("HOME", "."), "/src/full_trades_with_impact.csv")
+input_dir = os.path.join(storage_folder, "generated_trade_files")
+output_agg_file_location = os.path.join(storage_folder, "6g_liquidity_aggregation.csv")
+complete_file_location = os.path.join(storage_folder, "full_trades_with_impact.csv")
 
 # Streamlit Setup
 st.set_page_config(page_title="Trade Aggregator + Forecast", layout="wide")
