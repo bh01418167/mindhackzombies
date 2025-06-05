@@ -24,6 +24,9 @@ openai.api_base = AZURE_OPENAI_ENDPOINT
 openai.api_key = AZURE_OPENAI_API_KEY
 openai.api_version = "2023-07-01-preview"  # Use the version that supports GPT-4o
 
+input_dir = os.path.join(os.getenv("HOME", "."), "src/generated_trade_files")
+output_agg_file_location = os.path.join(os.getenv("HOME", "."), "/src/6g_liquidity_aggregation.csv")
+complete_file_location = os.path.join(os.getenv("HOME", "."), "/src/full_trades_with_impact.csv")
 
 # Streamlit Setup
 st.set_page_config(page_title="Trade Aggregator + Forecast", layout="wide")
@@ -66,7 +69,6 @@ if page == "📊 Trace":
     uploaded_files = st.file_uploader("Upload Files", type="csv", accept_multiple_files=True)
 
     if uploaded_files:
-        input_dir = "src/generated_trade_files"
         os.makedirs(input_dir, exist_ok=True)
         for f in os.listdir(input_dir):
             os.remove(os.path.join(input_dir, f))
@@ -81,8 +83,8 @@ if page == "📊 Trace":
             try:
                 aggregator = Aggregator()
                 aggregator.produce_aggregation_file()
-                agg_df = pd.read_csv("src/6g_liquidity_aggregation.csv")
-                complete_df = pd.read_csv("src/full_trades_with_impact.csv")
+                agg_df = pd.read_csv(output_agg_file_location)
+                complete_df = pd.read_csv(complete_file_location)
                 anomaly_rows = agg_df.sample(n=3, random_state=42)
                 anomaly_rows["is_anomaly"] = True
                 agg_df["is_anomaly"] = False
