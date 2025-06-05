@@ -87,11 +87,9 @@ if page == "📊 Trace":
                 aggregator.produce_aggregation_file()
                 agg_df = pd.read_csv(output_agg_file_location)
                 complete_df = pd.read_csv(complete_file_location)
-                anomaly_rows = agg_df.sample(n=20, random_state=42)
-                anomaly_rows["is_anomaly"] = True
+                anomaly_indices = agg_df.sample(n=20, random_state=42).index
                 agg_df["is_anomaly"] = False
-                agg_df = pd.concat([anomaly_rows, agg_df], ignore_index=True)
-                # agg_df = agg_df.sort_values(by="is_anomaly", ascending=False).reset_index(drop=True)
+                agg_df.loc[anomaly_indices, 'is_anomaly'] = True
                 st.session_state.agg_df = agg_df
                 st.session_state.complete_df = complete_df
                 st.session_state.aggregation_done = True
