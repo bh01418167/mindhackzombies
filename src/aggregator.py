@@ -1,3 +1,4 @@
+import logging
 import warnings
 
 from src.aggregation_model import AggregationModel
@@ -13,6 +14,9 @@ class Aggregator:
     complete_file_location = "./full_trades_with_impact.csv"
 
     def __init__(self):
+        logging.info("input dir:::", self.input_dir)
+        logging.info("output_agg_file_location:::", self.output_agg_file_location)
+        logging.info("complete_file_location:::", self.complete_file_location)
         self.aggregation_model = AggregationModel()
         self.preprocessor = PreProcessor()
         self.group_cols = ['Hour', 'Entity', 'Region', 'Product']
@@ -22,6 +26,7 @@ class Aggregator:
         dfs = self.__load_data()
         dfs = [self.preprocessor.normalize(df) for df in dfs]
         df_all = pd.concat([self.preprocessor.preprocess(df) for df in dfs], ignore_index=True)
+        logging.info("Aggregating with derived metrics and model impact...")
 
         print("Aggregating with derived metrics and model impact...")
         shap_df = self.aggregation_model.calculate_shap_impact(df_all)
@@ -34,6 +39,7 @@ class Aggregator:
             TradeCount=('TradeID', 'count')
         ).reset_index()
 
+        logging.info("Performing leave-one-out sensitivity analysis...")
         print("Performing leave-one-out sensitivity analysis...")
         df_all['LOOImpact'] = self.aggregation_model.leave_one_out_sensitivity(
             df_all, self.group_cols, 'DerivedWeight')
@@ -50,6 +56,8 @@ class Aggregator:
             df = pd.read_csv(f)
             df['SourceFile'] = os.path.basename(f)
             dfs.append(df)
+        logging.info("Loaded data...")
+        logging.info(dfs)
         return dfs
 
 
