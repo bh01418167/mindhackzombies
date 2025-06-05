@@ -1,6 +1,6 @@
 import warnings
 
-from aggregation_model import AggregationModel
+from src.aggregation_model import AggregationModel
 from preprocessor import PreProcessor
 import pandas as pd
 import glob
