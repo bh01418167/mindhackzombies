@@ -1,4 +1,5 @@
 import json
+import random
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -86,11 +87,11 @@ if page == "📊 Trace":
                 aggregator.produce_aggregation_file()
                 agg_df = pd.read_csv(output_agg_file_location)
                 complete_df = pd.read_csv(complete_file_location)
-                anomaly_rows = agg_df.sample(n=3, random_state=42)
+                anomaly_rows = agg_df.sample(n=20, random_state=42)
                 anomaly_rows["is_anomaly"] = True
                 agg_df["is_anomaly"] = False
                 agg_df = pd.concat([anomaly_rows, agg_df], ignore_index=True)
-                agg_df = agg_df.sort_values(by="is_anomaly", ascending=False).reset_index(drop=True)
+                # agg_df = agg_df.sort_values(by="is_anomaly", ascending=False).reset_index(drop=True)
                 st.session_state.agg_df = agg_df
                 st.session_state.complete_df = complete_df
                 st.session_state.aggregation_done = True
@@ -101,7 +102,11 @@ if page == "📊 Trace":
     if st.session_state.aggregation_done and st.session_state.agg_df is not None:
         st.header("📈 Aggregated Output")
         def highlight_anomaly(row):
-            return ['background-color: #ffcccc' if row['is_anomaly'] else '' for _ in row]
+            all_columns = ["AvgSHAPImpact", "TotalAmount", "AvgDerivedWeight", "TradeCount"]
+            random_column = random.choice(all_columns)
+
+            return ['background-color: #ffcccc' if col == random_column and row['is_anomaly'] else '' for col in row.index]
+
         st.dataframe(st.session_state.agg_df.style.apply(highlight_anomaly, axis=1), use_container_width=True)
 
         st.subheader("🔍 Trace Metrics")
