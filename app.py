@@ -92,7 +92,7 @@ if page == "📊 Trace":
                 complete_df = pd.read_csv(complete_file_location)
 
                 value_columns = ['TotalAmount', 'AvgDerivedWeight', 'AvgSHAPImpact']
-                train_files = [os.path.join("/home/storage", f"test_{i}_6g_liq_agg.csv") for i in range(5)]
+                train_files = [os.path.join("/home/storage", f"test_{i}_6g_liquidity_aggregation.csv") for i in range(5)]
 
                 # Initialize and train
                 detector = Detect(value_columns=value_columns, train_files=train_files)
