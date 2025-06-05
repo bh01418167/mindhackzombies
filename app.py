@@ -77,7 +77,7 @@ if page == "📊 Trace":
         for file in uploaded_files:
             with open(os.path.join(input_dir, file.name), "wb") as f:
                 f.write(file.read())
-        st.success(f"✅ Uploaded {len(uploaded_files)} files.")
+        st.toast(f"Uploaded {len(uploaded_files)} files.", icon="✅")
         st.session_state.uploaded = True
 
     if st.session_state.uploaded and not st.session_state.aggregation_done:
@@ -93,9 +93,9 @@ if page == "📊 Trace":
                 st.session_state.agg_df = agg_df
                 st.session_state.complete_df = complete_df
                 st.session_state.aggregation_done = True
-                st.success("✅ Aggregation complete!")
+                st.toast("Aggregation complete!", icon="✅")
             except Exception as e:
-                st.error(f"❌ Aggregation failed: {e}")
+                st.toast(f"Aggregation failed: {e}", icon="❌")
 
     if st.session_state.aggregation_done and st.session_state.agg_df is not None:
         st.header("📈 Aggregated Output")
@@ -124,7 +124,7 @@ if page == "📊 Trace":
                     ['Hour', 'Entity', 'Region', 'Product']
                 )
             except Exception as e:
-                st.error(f"❌ Trace failed: {e}")
+                st.toast(f"Trace failed: {e}", icon="❌")
 
         if st.session_state.trace_df is not None:
             st.dataframe(st.session_state.trace_df, use_container_width=True)
@@ -166,7 +166,7 @@ elif page == "💬 Chatbot Q&A":
                 reply = response['choices'][0]['message']['content']
                 st.chat_message("assistant").markdown(reply)
             except Exception as e:
-                st.error(f"❌ OpenAI Error: {e}")
+                st.toast(f"OpenAI Error: {e}", icon="❌")
 
 # Prediction Page
 elif page == "📈 Prediction":
@@ -215,7 +215,7 @@ elif page == "📈 Prediction":
             if match:
                 prediction = json.loads(match.group(0))  # Convert the matched JSON string to Python list
             else:
-                st.error("❌ GPT-4.1 did not return valid JSON. Forecasting failed.")
+                st.toast("GPT-4.1 did not return valid JSON. Forecasting failed.", icon="❌")
                 prediction = []
 
             forecast_df = pd.DataFrame(prediction)
@@ -235,5 +235,5 @@ elif page == "📈 Prediction":
             fig.autofmt_xdate()
             st.pyplot(fig)
         except Exception as e:
-            st.error(f"❌ Prediction failed: {e}")
+            st.toast(f"Prediction failed: {e}", icon="❌")
 
