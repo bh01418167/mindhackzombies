@@ -13,6 +13,7 @@ from src.aggregator import Aggregator
 from src.trade_tracer import TradeTracer
 import re
 
+from src.train_predict import Detect
 
 # Azure OpenAI Setup
 AZURE_OPENAI_ENDPOINT = "https://bh-us-openai-mindhackzombies.openai.azure.com/"
@@ -80,16 +81,52 @@ if page == "📊 Trace":
         st.toast(f"Uploaded {len(uploaded_files)} files.", icon="✅")
         st.session_state.uploaded = True
 
+    anomalies_by_row = {}
     if st.session_state.uploaded and not st.session_state.aggregation_done:
+
         if st.button("Run Aggregation"):
             try:
                 aggregator = Aggregator()
                 aggregator.produce_aggregation_file()
                 agg_df = pd.read_csv(output_agg_file_location)
                 complete_df = pd.read_csv(complete_file_location)
-                anomaly_indices = agg_df.sample(n=20, random_state=42).index
+
+                value_columns = ['TotalAmount', 'AvgDerivedWeight', 'AvgSHAPImpact']
+                train_files = [os.path.join("/home/storage", f"test_{i}_6g_liq_agg.csv") for i in range(5)]
+
+                # Initialize and train
+                detector = Detect(value_columns=value_columns, train_files=train_files)
+                detector.train_models()
+
+                # Detect anomalies in test data
+                anomalies_df = detector.detect_anomalies(output_agg_file_location)
+
+                # anomaly_indices = agg_df.index.intersection(anomalies_df.index).tolist()
+                # print(anomaly_indices)
+                anomaly_indices = []
+                anomalies_by_row = {}
+
+                # Filter only anomaly flag columns present in agg_df
+                # flag_columns = [f"{col}_is_anomaly" for col in value_columns if f"{col}_is_anomaly" in agg_df.columns]
+
+                value_columns = ['TotalAmount', 'AvgDerivedWeight', 'AvgSHAPImpact']
+                flag_columns = [f"{col}_is_anomaly" for col in value_columns]
+
+                # Loop through the anomaly DataFrame (can also be agg_df if it includes flags)
+                for idx in anomalies_df.index:
+                    anomalous_cols = []
+                    for col in flag_columns:
+                        if col in anomalies_df.columns and bool(anomalies_df.at[idx, col]):
+                            # Get the base column name without '_is_anomaly'
+                            anomalous_cols.append(col.replace('_is_anomaly', ''))
+
+                    if anomalous_cols:
+                        anomaly_indices.append(idx)
+                        anomalies_by_row[idx] = anomalous_cols
+
                 agg_df["is_anomaly"] = False
                 agg_df.loc[anomaly_indices, 'is_anomaly'] = True
+                # print("indices:", anomalies_by_row)
                 st.session_state.agg_df = agg_df
                 st.session_state.complete_df = complete_df
                 st.session_state.aggregation_done = True
@@ -100,10 +137,14 @@ if page == "📊 Trace":
     if st.session_state.aggregation_done and st.session_state.agg_df is not None:
         st.header("📈 Aggregated Output")
         def highlight_anomaly(row):
-            all_columns = ["AvgSHAPImpact", "TotalAmount", "AvgDerivedWeight", "TradeCount"]
-            random_column = random.choice(all_columns)
+            global anomalies_by_row
+            index = row.name  # row index from DataFrame
+            anomalous_cols = anomalies_by_row.get(index, [])
 
-            return ['background-color: #ffcccc' if col == random_column and row['is_anomaly'] else '' for col in row.index]
+            return [
+                'background-color: #ffcccc' if col in anomalous_cols else ''
+                for col in row.index
+            ]
 
         st.dataframe(st.session_state.agg_df.style.apply(highlight_anomaly, axis=1), use_container_width=True)
 
